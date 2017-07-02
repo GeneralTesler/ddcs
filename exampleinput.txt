@@ -1,0 +1,21 @@
+POST /dwr/call/plaincall/SearchDWR.findContacts.dwr HTTP/1.1
+Host: connect.data.com
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Content-Type: text/plain
+Referer: https://connect.data.com/search
+Content-Length: 406
+Cookie: JSESSIONID=xxx; webact=xxx; mbox=xxx; s_sess=xxx; DWRSESSIONID=xxx
+Connection: close
+
+callCount=1
+nextReverseAjaxIndex=0
+c0-scriptName=SearchDWR
+c0-methodName=findContacts
+c0-id=0
+c0-param0=string:%7B%22filters%22%3A%7B%22companies%22%3A%5B%22www.google.com%22%5D%7D%2C%22actionsOnColumns%22%3A%7B%22companyName%22%3A%7B%22sort%22%3A%22asc%22%7D%7D%2C%22totalRecordsOnPage%22%3A50%7D
+batchId=1
+instanceId=0
+page=%2Fsearch
+scriptSessionId=xxx

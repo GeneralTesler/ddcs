@@ -3,7 +3,7 @@ import os, sys, time
 import requests
 import re
 
-if len(sys.argv) == 1 or len(sys.argv) >= 4:
+if len(sys.argv) != 3:
     print '[-] Too few or too many arguments. Please refer to the README.'
     sys.exit()
 

@@ -29,8 +29,14 @@ specialchars = ['!','?','.','_','@','#','$','%','^','&','*','(',')','+','=','/',
 def processrequest(filename):
     with open(cwd+'/'+filename, 'r') as f:
         req = f.read()
-    headers, body = req.split('\n\n')
-    
+    if len(req.split('\n\n')) == 2:
+        headers, body = req.split('\n\n')
+    elif len(req.split('\n\r\n')) == 2:
+        headers, body = req.split('\n\r\n')
+    else:
+        print '[-] Error reading file'
+        sys.exit()
+        
     #get session data from headers
     jsessionid = re.search('JSESSIONID=.*?(;|\n)',headers).group(0)
     #jsessionid = jsessionid[11:len(jsessionid)-1]

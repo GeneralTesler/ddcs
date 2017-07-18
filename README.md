@@ -4,7 +4,9 @@ This script will scrape connect.data.com for employee names. The output list of 
 
 ## Usage
 
-**Requirements**: requests (pip install requests)
+**Requirements**: 
+
+pip install: requests, progress
 
 **Input**: a file containing the initial contact listing request on connect.data.com (https://connect.data.com/dwr/call/plaincall/SearchDWR.findContacts.dwr). This contains the three pieces of information needed for gathering the names: two session cookies and the target domain. I have included an example input file for reference.
 
@@ -24,4 +26,5 @@ This script will scrape connect.data.com for employee names. The output list of 
 
 ## Changelog
 
+- 7/17/2017 - fixed issue where an empty last line caused an error; added a progress bar
 - 7/1/2017 - inital commit

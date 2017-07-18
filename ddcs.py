@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os, sys, time
-import requests
-import re
+import requests, re
+from progress.bar import Bar
 
 if len(sys.argv) != 3:
     print '[-] Too few or too many arguments. Please refer to the README.'
@@ -54,7 +54,10 @@ def processrequest(filename):
                 line = re.sub(r'%22totalRecordsOnPage%22%3A.*?%7D',r'%22currentPage%22%3A1%2C%22totalRecordsOnPage%22%3A200%7D',line)
             else:
                 line = re.sub(r'%22totalRecordsOnPage%22%3A.*?%7D',r'%22totalRecordsOnPage%22%3A200%7D',line)
-        key, value = line.split('=')
+        try:
+            key, value = line.split('=')
+        except:
+            pass
         payload[key] = value.strip()
 
 
@@ -68,14 +71,17 @@ def iteratename():
     pages = re.search('count.*?,', r.text, re.DOTALL).group(0)
     pages = int(pages[6:len(pages)-1])/200 +2
 
+    bar = Bar('[+] Processing', max=pages)
+    bar.next()
     for i in range(1,pages):
         time.sleep(30)
+        bar.next()
         payload['c0-param0'] = re.sub(r'%22currentPage%22%3A.*?%2C', r'%22currentPage%22%3A'+str(i)+r'%2C', payload['c0-param0'], re.DOTALL)
         r = requests.post('https://connect.data.com/dwr/call/plaincall/SearchDWR.findContacts.dwr', data=payload, headers=reqheaders)
         if r.status_code != 200:
             print '[-] Error requesting names on page '+i
             pass
-        
+
         #extract names
         for each in re.findall('inactive.*?name.*?\".*?\"',r.text, re.DOTALL):
             name = re.search('name:\".*?\"',each).group(0)
@@ -87,6 +93,7 @@ def iteratename():
             #dont append any names containing special characters
             if not any(char in last for char in specialchars) and not any(char in first for char in specialchars): 
                 names.append(first+' '+last)
+    bar.finish() 
 
 #main
 if __name__ == '__main__':

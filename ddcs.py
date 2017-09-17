@@ -2,16 +2,42 @@
 import os, sys, time
 import requests, re
 from progress.bar import Bar
+import argparse
 
-if len(sys.argv) != 3:
-    print '[-] Too few or too many arguments. Please refer to the README.'
+def helpmsg(name=None):
+	return '''Generate a namelist from connect.data.com:
+./ddcs.py -i <input file> -o <output file> [-f <#> -d <domain>]
+
+Options: 
+-h, --help\tPrint this help menu
+-i\tInput file name (see exampleinput.txt for example)
+-o\tOutput file name
+-f\tEmail output format number. Supported formats: first.last (1), last.first (2), firstlast (3), lastfirst (4), finitlastn (5)(first initial last name)
+-d\tEmail domain (ex: domain.com)'''
+
+parser = argparse.ArgumentParser(usage=helpmsg(), add_help=False)
+parser.add_argument('-h', '--help', dest='helpbool', action='store_true', required=False)
+parser.add_argument('-o', dest='outputf', type=str, required=False)
+parser.add_argument('-i', dest='inputf', type=str, required=False)
+parser.add_argument('-f', dest='emailf', type=int, required=False)
+parser.add_argument('-d', dest='domain', type=str, required=False)
+args = vars(parser.parse_args())
+
+if len(sys.argv) == 1 or args['helpbool'] == True:
+	print helpmsg()
+	sys.exit()
+elif args['inputf'] is None:
+    print '[-] Error! Missing input file'
+    sys.exit()
+elif args['outputf'] is None:
+    print '[-] Error! Missing output file'
     sys.exit()
 
 #ascii art
 banner = ''' ______________
 |        ___   |
 |       |   |  | data.com scraper
-|       |   |  | v1.0
+|       |   |  | v2.0
 |   ____|   |  | 
 |  |        |  | 
 |  |  [ ]   |  | by:
@@ -60,6 +86,22 @@ def processrequest(filename):
             pass
         payload[key] = value.strip()
 
+def genemail(first,last):
+    #args['emailf'] ['domain']
+    if args['emailf'] == 1 and args['domain'] is not None:
+        email = first+'.'+last+'@'+args['domain']
+    elif args['emailf'] == 2 and args['domain'] is not None:
+        email = last+'.'+first+'@'+args['domain']
+    elif args['emailf'] == 3 and args['domain'] is not None:
+        email = first+last+'@'+args['domain']
+    elif args['emailf'] == 4 and args['domain'] is not None:
+        email = last+first+'@'+args['domain']
+    elif args['emailf'] == 5 and args['domain'] is not None:
+        email = first[:1]+last+'@'+args['domain']
+    else:
+        email = 'null'
+    
+    return email.lower()
 
 def iteratename():
     r = requests.post('https://connect.data.com/dwr/call/plaincall/SearchDWR.findContacts.dwr', data=payload, headers=reqheaders)
@@ -92,20 +134,22 @@ def iteratename():
                 pass
             #dont append any names containing special characters
             if not any(char in last for char in specialchars) and not any(char in first for char in specialchars): 
-                names.append(first+' '+last)
+                email = genemail(first,last)
+                names.append(first+','+last+','+email)
     bar.finish() 
 
 #main
 if __name__ == '__main__':
     print banner
     print '[+] Reading input file'
-    processrequest(sys.argv[1])
+    processrequest(args['inputf'])
     print '[+] Requesting names from data.com'
     iteratename()
     
-    writeto = open(sys.argv[2], 'w+')
+    writeto = open(args['outputf'], 'w+')
+    writeto.write('First Name, Last Name, Email\n')
     for name in names:
         writeto.write(name.encode('utf-8'))
         writeto.write('\n')
     writeto.close()
-    print '[+] '+ str(len(names))+' names written to: '+sys.argv[2]
+    print '[+] '+ str(len(names))+' names written to: '+args['outputf']
